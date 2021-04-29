@@ -16,10 +16,10 @@ static float SCALE = 1;	// used to return weight in grams, kg, ounces, whatever
 
 void HX711_init(gpio_num_t dout, gpio_num_t pd_sck, HX711_GAIN gain )
 {
-	GPIO_PD_SCK = pd_sck;
-	GPIO_DOUT = dout;
+    GPIO_PD_SCK = pd_sck;
+    GPIO_DOUT = dout;
 
-	gpio_config_t io_conf;
+    gpio_config_t io_conf;
     io_conf.intr_type = GPIO_PIN_INTR_DISABLE;
     io_conf.mode = GPIO_MODE_OUTPUT;
     io_conf.pin_bit_mask = (1UL<<GPIO_PD_SCK);
@@ -134,11 +134,11 @@ float HX711_get_units(char times)
 	return HX711_get_value(times) / SCALE;
 }
 
-void HX711_tare( ) 
+void HX711_tare(int times) 
 {
 	ESP_LOGI(DEBUGTAG, "===================== START TARE ====================");
 	unsigned long sum = 0; 
-	sum = HX711_read_average(20);
+	sum = HX711_read_average(times);
 	HX711_set_offset(sum);
 	ESP_LOGI(DEBUGTAG, "===================== END TARE: %ld ====================",sum);
 }

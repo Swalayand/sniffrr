@@ -1,0 +1,19 @@
+Download framework https://github.com/espressif/esp-idf
+
+Linux getting started 
+
+$cd esp-idf ; install.sh
+
+$ . ./export.sh ("." punya arti kayak source; setting awal supaya environment pakai idf; dilakukan tiap environement baru nyala)
+
+Project 
+
+$cd examples/get-started/hello_world
+
+$make (exit from menu config)
+
+$python /home/pi/dev/esp-idf/components/esptool_py/esptool/esptool.py --chip esp32 --port /dev/ttyUSB0 --baud 115200 --before default_reset --after hard_reset write_flash -z --flash_mode dio --flash_freq 40m --flash_size detect 0x1000 /home/pi/dev/esp-idf/examples/get-started/hello_world/build/bootloader/bootloader.bin 0x10000 /home/pi/dev/esp-idf/examples/get-started/hello_world/build/hello-world.bin 0x8000 /home/pi/dev/esp-idf/examples/get-started/hello_world/build/partitions_singleapp.bin
+
+Monitor log https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-guides/tools/idf-monitor.html
+
+$make monitor
