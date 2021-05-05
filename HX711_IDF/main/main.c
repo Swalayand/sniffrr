@@ -23,7 +23,7 @@ static void weight_reading_task(void* arg)
     HX711_init(GPIO_DATA,GPIO_SCLK,eGAIN_128); 
     
     //HX711_set_scale(233.82);
-    HX711_set_scale(21.47);
+    HX711_set_scale(41.20);
     
     HX711_tare(1);
     

@@ -50,7 +50,7 @@ void HX711_set_gain(HX711_GAIN gain)
 
 uint8_t HX711_shiftIn()
 {
-	uint8_t value = 0;
+    uint8_t value = 0;
 
     for(int i = 0; i < 8; ++i) 
     {
@@ -143,7 +143,7 @@ void HX711_tare(int times)
 	ESP_LOGI(DEBUGTAG, "===================== END TARE: %ld ====================",sum);
 }
 
-void HX711_set_scale(float scale ) 
+void HX711_set_scale(float scale) 
 {
 	SCALE = scale;
 }
