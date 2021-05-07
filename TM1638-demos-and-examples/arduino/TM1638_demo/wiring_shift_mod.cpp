@@ -25,18 +25,19 @@
 #include "wiring_private.h"
 #include "wiring_shift_mod.h"
 
+#define SEVSEG_NUM 8
+
 uint8_t shiftInMod(uint8_t dataPin, uint8_t clockPin, uint8_t bitOrder, uint8_t clock_type, uint16_t clock_delay_us) {
 	uint8_t value = 0;
 	uint8_t i;
 
-  
-	for (i = 0; i < 8; ++i) {
+	for (i = 0; i < SEVSEG_NUM; ++i) {
 		digitalWrite(clockPin, (clock_type ? LOW : HIGH));
     delayMicroseconds(clock_delay_us);
 		if (bitOrder == LSBFIRST)
 			value |= digitalRead(dataPin) << i;
 		else
-			value |= digitalRead(dataPin) << (7 - i);
+			value |= digitalRead(dataPin) << ((SEVSEG_NUM-1) - i);
 		digitalWrite(clockPin, (clock_type ? HIGH : LOW));
 	}
 	return value;
@@ -46,11 +47,11 @@ void shiftOutMod(uint8_t dataPin, uint8_t clockPin, uint8_t bitOrder, uint8_t cl
 {
 	uint8_t i;
 
-	for (i = 0; i < 8; i++)  {
+	for (i = 0; i < SEVSEG_NUM; i++)  {
 		if (bitOrder == LSBFIRST)
 			digitalWrite(dataPin, !!(val & (1 << i)));
 		else	
-			digitalWrite(dataPin, !!(val & (1 << (7 - i))));
+			digitalWrite(dataPin, !!(val & (1 << ((SEVSEG_NUM-1) - i))));
 			
 		digitalWrite(clockPin, (clock_type ? LOW : HIGH));
     delayMicroseconds(clock_delay_us);

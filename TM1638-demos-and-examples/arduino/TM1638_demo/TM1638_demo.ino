@@ -1,12 +1,11 @@
-
 #include "wiring_shift_mod.h"
 
 #define CLOCK_TYPE CLOCK_INVERT
 #define CLOCK_DELAY_US 1
 
-const int strobe_pin =  4;
-const int clock_pin  = 16;
-const int data_pin   = 17;
+const int strobe_pin =  4; // STB
+const int clock_pin  = 16; // CLK
+const int data_pin   = 17; // DI/O
 
 #define COUNTING_MODE 0
 #define SCROLL_MODE 1
@@ -14,32 +13,62 @@ const int data_pin   = 17;
 
 void setup()
 {
-  pinMode(strobe_pin, OUTPUT);
-  pinMode(clock_pin, OUTPUT);
-  pinMode(data_pin, OUTPUT);
+  Serial.begin(9600);
 
+  pinMode(strobe_pin, INPUT);
+  pinMode(clock_pin, INPUT);
+  pinMode(data_pin, INPUT);
+  
   sendCommand(0x8f);  // activate
   reset();
 }
+
+
+void writeBit(int val){ // conclusion: convert decimal to binary pulse
+  uint8_t bit;
+  for (int i = 0; i < 8; i++)  {
+    bit = !!(val & (1 << i));
+    digitalWrite(clock_pin, bit); 
+    //  delay(6);
+    /*
+    1000 microsecond = 1 milisecond. delayMicroseconds(1000) = delay(1) tapi implementasi 
+    2 fungsi beda sehingga mempengaruhi kerapatan bit/s. Sehingga pakai fungsi delayMicroseconds
+    1000 microsecond = bitrate 960    
+    */
+    delayMicroseconds(1);
+  }
+//  digitalWrite(clock_pin, HIGH); 
+//  delay(50);
+//  digitalWrite(clock_pin, HIGH); 
+//  delay(50);
+}
+
 
 void loop()
 {
   static uint8_t mode = COUNTING_MODE;
 
-  switch(mode)
-  {
-  case COUNTING_MODE:
-    mode += counting();
-    break;
-  case SCROLL_MODE:
-    mode += scroll();
-    break;
-  case BUTTON_MODE:
-    buttons();
-    break;
-  }
+  // switch(mode)
+  // {
+  // case COUNTING_MODE:
+  //   mode += counting();
+  //   break;
+  // case SCROLL_MODE:
+  //   mode += scroll();
+  //   break;
+  // case BUTTON_MODE:
+  //   buttons();
+  //   break;
+  // }
 
-  delay(200);
+  //konsep digitalWrite sederhana sebelum pakai shiftOutMod
+  //writeBit(123);
+  
+  uint8_t readMegaWin; 
+  for (int i = 0; i < 8; i++)  {
+    shiftInMod(data_pin, clock_pin, LSBFIRST , CLOCK_TYPE , CLOCK_DELAY_US );
+  }
+  //Serial.println(readMegaWin);
 }
 
 void sendCommand(uint8_t value)
@@ -54,7 +83,7 @@ void reset()
   sendCommand(0x40); // set auto increment mode
   digitalWrite(strobe_pin, LOW);
   shiftOutMod(data_pin, clock_pin, LSBFIRST, CLOCK_TYPE, CLOCK_DELAY_US, 0xc0);   // set starting address to 0
-  for(uint8_t i = 0; i < 16; i++)
+  for(uint8_t i = 0; i <= 5; i++)
   {
     shiftOutMod(data_pin, clock_pin, LSBFIRST, CLOCK_TYPE, CLOCK_DELAY_US, 0x00);
   }
@@ -63,17 +92,19 @@ void reset()
 
 bool counting()
 {
-                       /*0*/ /*1*/ /*2*/ /*3*/ /*4*/ /*5*/ /*6*/ /*7*/ /*8*/ /*9*/
-  uint8_t digits[] = { 0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f, 0x6f };
+                            /*0*//*1*//*2*//*3*//*4*//*5*//*6*//*7*//*8*//*9*/
+  //uint8_t digits[] = { 0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f, 0x6f };
+  uint8_t digits[]       = { 219, 130, 185, 179, 226, 115, 123, 195, 251, 243 };
+  uint8_t digits_comma[] = { 223, 134, 191, 183, 230, 119, 127, 199, 255, 247 };
 
   static uint8_t digit = 0;
 
   sendCommand(0x40);
   digitalWrite(strobe_pin, LOW);
   shiftOutMod(data_pin, clock_pin, LSBFIRST, CLOCK_TYPE, CLOCK_DELAY_US, 0xc0);
-  for(uint8_t position = 0; position < 8; position++)
-  {
-    shiftOutMod(data_pin, clock_pin, LSBFIRST, CLOCK_TYPE, CLOCK_DELAY_US, digits[digit]);
+  
+  for(uint8_t position = 0; position < 5; position++){
+    shiftOutMod(data_pin, clock_pin, LSBFIRST, CLOCK_TYPE, CLOCK_DELAY_US, digits[9]);
     shiftOutMod(data_pin, clock_pin, LSBFIRST, CLOCK_TYPE, CLOCK_DELAY_US, 0x00);
   }
 
@@ -83,6 +114,7 @@ bool counting()
   return digit == 0;
 }
 
+// belum perlu dibaca
 bool scroll()
 {
   uint8_t scrollText[] =
