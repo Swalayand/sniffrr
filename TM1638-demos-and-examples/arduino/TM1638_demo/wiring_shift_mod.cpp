@@ -43,6 +43,42 @@ uint8_t shiftInMod(uint8_t dataPin, uint8_t clockPin, uint8_t bitOrder, uint8_t 
 	return value;
 }
 
+uint8_t shiftInModMW(uint8_t dataPin, uint8_t clockPin, uint8_t bitOrder, uint8_t clock_type, uint16_t clock_delay_us) {
+	uint8_t value = 0;
+	uint8_t i;
+
+	for (i = 0; i < SEVSEG_NUM; ++i) {
+    delay(clock_delay_us);
+		if (bitOrder == LSBFIRST)
+			value |= digitalRead(dataPin) << i;
+		else
+			value |= digitalRead(dataPin) << ((SEVSEG_NUM-1) - i);
+	}
+	return value;
+}
+
+
+void shiftOutMod2(uint8_t dataPin, uint8_t clockPin, uint8_t bitOrder, uint8_t clock_type, uint16_t clock_delay_us, uint8_t val)
+{
+	uint8_t i;
+
+	for (i = 0; i < SEVSEG_NUM; i++)  {
+		if (bitOrder == LSBFIRST)
+			digitalWrite(dataPin, !!(val & (1 << i)));
+		else	
+			digitalWrite(dataPin, !!(val & (1 << ((SEVSEG_NUM-1) - i))));
+			
+		digitalWrite(clockPin, (clock_type ? LOW : HIGH));
+    delayMicroseconds(clock_delay_us);
+		digitalWrite(clockPin, (clock_type ? HIGH : LOW));		
+	}
+  
+  	digitalWrite(dataPin, LOW );
+		digitalWrite(clockPin, (clock_type ? LOW : HIGH));
+    delayMicroseconds(clock_delay_us);
+		digitalWrite(clockPin, (clock_type ? HIGH : LOW));		
+
+}
 void shiftOutMod(uint8_t dataPin, uint8_t clockPin, uint8_t bitOrder, uint8_t clock_type, uint16_t clock_delay_us, uint8_t val)
 {
 	uint8_t i;
