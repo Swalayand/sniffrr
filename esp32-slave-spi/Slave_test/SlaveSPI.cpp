@@ -46,8 +46,8 @@ esp_err_t SlaveSPI::begin(gpio_num_t so, gpio_num_t si, gpio_num_t sclk, gpio_nu
     callback_after_transmission = callback;
 
     max_buffer_size = buffer_size;  // should set to the minimum transaction length
-    tx_buffer       = (uint8_t *)heap_caps_malloc(max(max_buffer_size, 32), SPI_MALLOC_CAP);
-    rx_buffer       = (uint8_t *)heap_caps_malloc(max(max_buffer_size, 32), SPI_MALLOC_CAP);
+    tx_buffer       = (uint8_t *)heap_caps_malloc( 32 /*max(max_buffer_size, 32)*/, SPI_MALLOC_CAP);
+    rx_buffer       = (uint8_t *)heap_caps_malloc( 32 /*max(max_buffer_size, 32)*/, SPI_MALLOC_CAP);
     
     // for (int i = 0; i < max_buffer_size; i++) { tx_buffer[i] = 0; rx_buffer[i] = 0; }  // XXX: memset
     memset(tx_buffer, 0, max_buffer_size);
@@ -161,7 +161,7 @@ esp_err_t SlaveSPI::initTransmissionQueue() {
     // }
     // output_stream = &(output_stream[i]);  // Segmentation. The remain is left for future.
 
-    int size = min(max_buffer_size, output_stream.length());                  // NOT over the buffer's size.
+    int size = max_buffer_size; //min(max_buffer_size, output_stream.length());                  // NOT over the buffer's size.
     memcpy((void *)transaction->tx_buffer, output_stream.getBuffer(), size);  // Rearrange the tx data.
     output_stream.remove(0, size);                                            // Segmentation. Remain for future.
 
