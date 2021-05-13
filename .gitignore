@@ -1,2 +1,5 @@
 HX711_IDF/**/build
+esp_spi_example/**/build
+Logic_analyzer-v1/**/build
+bit-bang/**/build
 Learn-C/*.out

@@ -32,16 +32,14 @@ IN THE SOFTWARE.
 
 
 #define SPI_MODE  0
-#define MISO_PIN  17
-#define MOSI_PIN  5
-#define SCLK_PIN  23
-#define CS_PIN    16
+#define MISO_PIN  4
+#define MOSI_PIN  17 //DIO
+#define SCLK_PIN  16
+#define CS_PIN    2
 #define SPI_CLOCK 1000000  // 1 MHz
 
 
 extern "C" void app_main() {
-    printf("SPIbus Example \n");
-    fflush(stdout);
 
     SPI_t &mySPI = vspi;  // vspi and hspi are the default objects
     
@@ -51,7 +49,7 @@ extern "C" void app_main() {
 
     uint8_t buffer[6];
     while (1) {
-        ESP_ERROR_CHECK(mySPI.readBytes(device, 0x3B, 6, buffer));
+        ESP_ERROR_CHECK(mySPI.readBytes(device, 0x3B, 8, buffer));
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 
