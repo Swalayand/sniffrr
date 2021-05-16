@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -80,29 +79,29 @@ static void i2c_isr_gpio_task(void* arg) {
     }
 }
 static void i2c_w_task(void* arg) {
-    uint32_t io_num;
+  uint32_t io_num;
 	uint8_t val;
 	uint8_t i = 0;
-    for(;;) {
+  for(;;) {
 		val = 0;
-        if( xQueueReceive(gpio_clk_queue, &io_num, portMAX_DELAY)  ) 
+    if( xQueueReceive(gpio_clk_queue, &io_num, portMAX_DELAY)  ) 
 		{
-            val |= gpio_get_level(io_num) << i; i++;
+      val |= gpio_get_level(io_num) << i; i++;
 			if( i > 7 ) {
-              printf("%d %d\n", io_num, val );  
+        printf("%d %d\n", io_num, val );  
 			  val = 0; i=0; 
 			}    
 		}
-    }
+  }
 }
 int isr_io_config() {
 	gpio_config_t io_conf;
-    io_conf.intr_type    = GPIO_PIN_INTR_DISABLE; //disable interrupt
-    io_conf.mode         = GPIO_MODE_INPUT; //set as output mode
-    io_conf.pin_bit_mask = GPIO_INPUT_PIN_SEL; //bit mask of the pins that you want to set,e.g.GPIO18/19
-    io_conf.pull_down_en = 0; //disable pull-down mode
-    io_conf.pull_up_en   = 1;  //disable pull-up mode
-    gpio_config( &io_conf ); //configure GPIO with the given settings
+  io_conf.intr_type    = GPIO_PIN_INTR_DISABLE; //disable interrupt
+  io_conf.mode         = GPIO_MODE_INPUT; //set as output mode
+  io_conf.pin_bit_mask = GPIO_INPUT_PIN_SEL; //bit mask of the pins that you want to set,e.g.GPIO18/19
+  io_conf.pull_down_en = 0; //disable pull-down mode
+  io_conf.pull_up_en   = 1;  //disable pull-up mode
+  gpio_config( &io_conf ); //configure GPIO with the given settings
 
 
 /* // AKTIFKAN Interrupt
@@ -118,6 +117,7 @@ int isr_io_config() {
 	*/
 	return 0;
 }
+
 void app_main2()
 {
 //	pca9555_init();
@@ -153,18 +153,18 @@ static void init_sdcard() // tested on esp32 cam
     printf( "Failed to mount SD card VFAT filesystem. Error: %s\n", esp_err_to_name(ret));
   }
 
-    char *fn = "/sdcard/rec1.txt";
-    FILE *file = fopen( fn , "w");
-    if (file != NULL)
-    {
-      size_t err = fwrite( fn, 1, strlen(fn), file);
-      printf( "File saved: %s\n", fn );
-    }
-    else
-    {
-      printf( "Could not open file %s\n", fn );
-    }
-    fclose(file);
+  char *fn = "/sdcard/rec1.txt";
+  FILE *file = fopen( fn , "w");
+  if (file != NULL)
+  {
+    size_t err = fwrite( fn, 1, strlen(fn), file);
+    printf( "File saved: %s\n", fn );
+  }
+  else
+  {
+    printf( "Could not open file %s\n", fn );
+  }
+  fclose(file);
 
 }
 
@@ -179,11 +179,25 @@ struct timeval tv_now;
 state_t astb[ AMAX ], aclk[ AMAX ], adat[ AMAX ];
 int cstb=0, cclk=0, cdat=0 ; //counter array stb
 
+/*
+If need time
+
+time_t t;
+struct tm tm;
+
+int64_t time_us;
+
+%d-%02d-%02d %02d:%02d:%02d:%2lld
+
+tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec, time_us
+
+gettimeofday(&tv_now, NULL);
+time_us = (int64_t)tv_now.tv_sec * 1000000L + (int64_t)tv_now.tv_usec;
+
+*/
+
 void read_bitbybit(void *pvParameter) {
-	time_t t;
-  struct tm tm;
-  
-	int64_t time_us;
+
 
 	uint8_t clk, clk0=0, clks , dat , dat0=0, dats, stb, stb0=0 , stbs; // clks = clkStatus
 	uint64_t timer_start , ts =0, tc, td, ctr=1;
@@ -229,11 +243,8 @@ void read_bitbybit(void *pvParameter) {
     dat0 = dat;
 	  
 	  timer_start = esp_timer_get_time();
-
-		gettimeofday(&tv_now, NULL);
-		time_us = (int64_t)tv_now.tv_sec * 1000000L + (int64_t)tv_now.tv_usec;
 		
-	  printf( "%d  %6s %d %6s %d %6s %6lld %6lld %6lld %d-%02d-%02d %02d:%02d:%02d:%2lld\n", stb, state[stbs], clk, state[clks], dat, state[dats],  tc-ts, td-tc, timer_start-td, tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec, time_us)	 ;
+	  printf( "%d  %6s %d %6s %d %6s %6lld %6lld %6lld \n", stb, state[stbs], clk, state[clks], dat, state[dats],  tc-ts, td-tc, timer_start-td)	 ;
 	  ts =  timer_start;
 	  ctr++;
 	}
@@ -241,7 +252,7 @@ void read_bitbybit(void *pvParameter) {
 	for(i = 0; i < AMAX; i++) { 
 		t = time(NULL);
 	  printf( "%4d %6s \t  %4d %6s \t  %4d %6s  %4d \n", i, state[ astb[ i ].state ], astb[ i ].ctr, state[ aclk[ i ].state], aclk[ i ].ctr, state[ adat[ i ].state ], adat[ i ].ctr );
-	   //printf( "%4d %6d  %4d  %6d  %4d %6d  %4d \n", i,  astb[ i ].state , astb[ i ].ctr,  aclk[ i ].state, aclk[ i ].ctr,  adat[ i ].state , adat[ i ].ctr );
+	  //printf( "%4d %6d  %4d  %6d  %4d %6d  %4d \n", i,  astb[ i ].state , astb[ i ].ctr,  aclk[ i ].state, aclk[ i ].ctr,  adat[ i ].state , adat[ i ].ctr );
 	}
 }
 
