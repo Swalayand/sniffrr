@@ -16,15 +16,13 @@ typedef struct  {
     int     ctr ;
 } state_t;
 
-// Semua dengan tanda #1 adalah kode untuk pembuktian data benar
-//#1 state_t ar[10000000];
-state_t pin1;
+state_t stb_pin;
 
 char *state[] = { "LOW", "RISING", "FALLING", "HIGH", "BLANK" };
 
 int shbf;
 
-uint8_t g_prev, g_s_prev;
+uint8_t g_prev;
 
 int j = 0;
 void set_state(uint8_t current_p, uint8_t prev_p, state_t *pin){
@@ -32,16 +30,13 @@ void set_state(uint8_t current_p, uint8_t prev_p, state_t *pin){
 	state_p = current_p | (prev_p << 1);
 	
 	if (state_p != pin->state){
-		/* 
-		#1 
-		ar[j].state = pin->state;
-		ar[j].ctr = pin->ctr;
-		j++;
-		*/
 		pin->state = state_p;
 		pin->ctr=1;
+		shbf = 0;
 	}else{
-		//#1 ar[j].ctr = pin->ctr;
+		if (state_p == 3){
+			shbf++;
+		}
 		pin->ctr++;
 	}
 	
@@ -54,34 +49,15 @@ int main(){
 	if (!bcm2835_init()) return 1;
     bcm2835_gpio_fsel(STB, BCM2835_GPIO_FSEL_INPT); 
 	
-	/*
-	#1
+	uint8_t stb_dat;
 	for (int i = 0; i < 10000000; i++){
-		ar[i].state = 4;
-		ar[i].ctr = 0;
-	}
-	*/
-	
-	uint8_t dat;
-	for (int i = 0; i < 10000000; i++){
-		dat = bcm2835_gpio_lev( STB );
-		set_state(dat, g_prev, &pin1);
-	}
-	
-	/* 
-	#1
-	int jum = 0;
-	for (int i = 0; i < 10000000; i++){
-
-		jum += ar[i].ctr;
-		if (ar[i].state == 4){
-			break;
+		stb_dat = bcm2835_gpio_lev( STB );
+		set_state(stb_dat, g_prev, &stb_pin);
+		if (shbf > 200000){
+			printf("One cycle\n");
 		}
-		
-		printf("%3d %7s %d\n", i, state[ar[i].state], ar[i].ctr);
 	}
-	printf("%d", jum);
-	*/
+	
 	printf("\n");
 
 	return 0;
