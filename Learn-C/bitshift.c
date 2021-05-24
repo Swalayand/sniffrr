@@ -2,14 +2,14 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#define VAL 123
+#define VAL 12
 
 char* write(int val){ // conclusion: convert decimal to binary pulse
   char* c;
-  c = malloc(8);
+  c = malloc(16);
   for (int i = 0; i < 8; i++)  {
 		//printf( "%d" , !!(val & (1 << i)));
-    sprintf( c+i, "%d" , !!(val & (1 << i)));
+    sprintf( c+i, "%d " , !!(val & (1 << i)));
   }
   // printf("\n");
   return c;
@@ -18,13 +18,13 @@ char* write(int val){ // conclusion: convert decimal to binary pulse
 void read(char* pls){ // conclusion: convert binary pulse to decimal
   uint8_t value = 0b0;
 
-  int pulse[] = {1, 1, 0, 1, 1, 1, 1, 0}; // representaion of pulse on array of int
+  int pulse[] = {1, 1, 0, 0, 0, 0, 0, 0}; // representaion of pulse on array of int
 	
   printf("bit shifting: ");
   for (int i = 0; i < 8; ++i) {
 		value = value | ((int)pls[i]-48) << i;
     printf( "%d " , value); 
-	}
+  }
   printf("\n");
   printf( "read binary pulse: %d \n" , value); 
 }

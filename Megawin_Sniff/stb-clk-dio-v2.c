@@ -28,8 +28,8 @@ typedef struct  {
 #define RISING 1
 
 uint8_t ar[LENGTH];
-                           /*0*//*1*//*2*//*3*//*4*//*5*//*6*//*7*//*8*//*9*/
-uint8_t digits[]       = { 219, 130, 185, 179, 226, 115, 123, 195, 251, 243 };
+                           /*0*//*1*//*2*//*3*//*4*//*5*//*6*//*7*//*8*///9    0.  1.   2.
+uint8_t digits[]       = { 219, 130, 185, 179, 226, 115, 123, 131, 251, 243, 223, 134, 189, 183, 230, 119, 127, 135, 255, 247 };
 uint8_t digits_comma[] = { 223, 134, 191, 183, 230, 119, 127, 199, 255, 247 };
 
 char *state[] = { "LOW", "RISING", "FALLING", "HIGH", "BLANK" };
@@ -74,23 +74,24 @@ int main(){
 		
 		stb_dat = bcm2835_gpio_lev( STB );
 		clk_dat = bcm2835_gpio_lev( CLK );
+		dio_dat = bcm2835_gpio_lev( DIO );
 		stb_state = set_state(stb_dat, g_s_prev, &stb_pin, &g_s_prev, &stb_pin_prev);
 		clk_state = set_state(clk_dat, g_c_prev, &clk_pin, &g_c_prev, &clk_pin_prev);
 		
 		//#1
-		if (stb_pin_prev.ctr > 50000 && stb_pin.state == FALLING){
+		if (stb_pin_prev.ctr > 40000 && stb_pin.state == FALLING){
 			shbf_done = 1;
 		}
 		//
 		
-		/*
+		
 		if (shbf_done == 1 && stb_pin.state == RISING){
 			count_rising_stb++;
-			if (count_rising_stb > 5){
+			if (count_rising_stb > 3){
 				shbf_done = 0;
 			}
 		}
-		*/
+		
 				
 		if (shbf_done == 1 && clk_pin.state == RISING){
 
@@ -106,52 +107,34 @@ int main(){
 				value |= dio_dat << ctr_dio;
 			}
 			*/
-			dio_dat = bcm2835_gpio_lev( DIO );
-			/*
-			if (ctr_dio < 8){ 
-				value = value | (dio_dat << ctr_dio++);
-				ar[car++] = dio_dat;
-			}else{
-				
+			if (ctr_dio >  7 ){ 
 				ar[car++] = value;
 
 				if (car > 150){
 					break;
 				}
-
-				ctr_dio = 0; value = 0; 
+				ctr_dio = 0; value = 0; // dua baris di bawah ini, kalo dihilangkan menyebabkan meleset 1 bit ke kiri per cycle/byte
 				value = value | (dio_dat << ctr_dio++);
 				ar[car++] = dio_dat;
+			}else{				
+				//dio_dat = bcm2835_gpio_lev( DIO );
+				ar[car++] = dio_dat;
+				value = value | (dio_dat << ctr_dio++);
 			}
-			*/	
-			if (ctr_dio > 7){
-				
-				ar[car++] = value;
-
-				if (car > 150){
-					break;
-				}
-
-				ctr_dio = 0; value = 0; 
-
-			}
-			value = value | (dio_dat << ctr_dio++);
-			ar[car++] = dio_dat;
 		}	
 	}
 	printf("  1   2   3   4   5   6   7   8\n\n");
-
 	for (int i = 0; i < car; i++){
-	printf("%3d ", ar[i]);
+		printf("%3d ", ar[i]);
 		if ((i+1)%9 == 0 && i!=0){
-			for (int j = 0; j < 10; j++){
-				if (ar[i] == digits[j]){
-					printf("%d ", j%10 );
+				for (int j = 0; j < 20; j++){
+					if (ar[i] == digits[j]){
+						printf("%d ", j%10 );
+					}
 				}
-			}
 			printf("\n");
 		}
-	}		
+	}	
 	printf("\n");
 	return 0;
 }

@@ -8,10 +8,11 @@
  Fungsi utama: count dan shift state
  1. Menggabungkan bit saat ini (current_p) dengan sebelumnya (g_prev) untuk mendapatkan state. Count mencatat seberapa banyak state itu terdapat dalam satuan data.
  2. Membedakan state yang sudah tersimpan (pin->state) dengan yang saat ini (state_p).
+ 
  Yang ditandai pakai #1 berarti satu algoritma yang saling berhubungan:
  1. Ketika stb_pin.ctr sudah mencapai >40000 maka ctr selanjutnya akan ditimpa (diganti dengan pembacaan baru) karena pakai struct biasa (nggak disimpan di array).
 	Sehingga pengecekan akan masa lalu dan masa sekarang sangat penting. Maka muncul stb_pin_prev.ctr.
-
+ 
 */
 
 #define STB  17
@@ -108,6 +109,8 @@ int main(){
 			*/
 			dio_dat = bcm2835_gpio_lev( DIO );
 			/*
+			
+			
 			if (ctr_dio < 8){ 
 				value = value | (dio_dat << ctr_dio++);
 				ar[car++] = dio_dat;
@@ -159,4 +162,20 @@ int main(){
 /*
 DIO diambil sampai STB rising terakhir. 
 * Ketika mulai shbf_done, hitung rising STB, kalau sudah lebih dari 3, shbf_done = 0 dan berhenti ambil DIO
+* 
+Kesalahan Penerjemahan Logika dari paragraf ke source-code 
+Contoh desain:
+
+1. STB HIGH > 50000 dan falling pertama
+2. CLK diambil ketika RISING
+3. CLK RISING, ambil DIO saat itu
+* 
+P1. Dari desain 1, 2, dan 3, gambaran penerjemahan ke dalam source-code adalah nested if
+P2. Penggabungan 2 kondisi yang mengabaikan tertimpanya variable yang sama.
+ 	Contoh: Ketika stb_pin.ctr sudah mencapai >40000 maka ctr selanjutnya akan ditimpa (diganti dengan pembacaan baru) karena pakai struct biasa (nggak disimpan di array).
+	Sehingga pengecekan akan masa lalu dan masa sekarang sangat penting. Maka muncul stb_pin_prev.ctr.
+P3. Penambahan fitur menyebabkan logika lama nggak berlaku di fitur baru
+ 	Contoh: shbf_done = 0; kesalahan logic yang sangat fatal; shbf_done dibutuhkan berkali2, tapi dibatasi
+P4. Mengopi kode dengan mengabaikan logika yang sesuai.
+	
 */
