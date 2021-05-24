@@ -16,7 +16,7 @@ typedef struct  {
     int     ctr ;
 } state_t;
 uint8_t ar[LENGTH];
-                           /*0*//*1*//*2*//*3*//*4*//*5*//*6*//*7*//*8*//*9*/
+                          /*0*//*1*//*2*//*3*//*4*//*5*//*6*//*7*//*8*//*9*/
 uint8_t digits[]       = { 219, 130, 185, 179, 226, 115, 123, 195, 251, 243 };
 uint8_t digits_comma[] = { 223, 134, 191, 183, 230, 119, 127, 199, 255, 247 };
 
@@ -32,9 +32,7 @@ uint8_t set_state(uint8_t current_p, uint8_t prev_p, state_t *pin, uint8_t *gp, 
 	if (state_p != pin->state){
 		pin->state = state_p;
 		pin->ctr = 1;
-	}else{
-		pin->ctr++;
-	}
+	}else pin->ctr++;
 	*gp = current_p; // general prev
 	return state_p;
 }
