@@ -2,12 +2,12 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-#include <time.h>
+#include <unistd.h>
 
-#define STB  17
-#define CLK  18 
-#define DIO  22 
-#define LENGTH 10000000
+#define STB  	17
+#define CLK  	18 
+#define DIO 	22 
+#define LENGTH 	10000000
 #define FALLING 2
 #define RISING  1
 
@@ -16,7 +16,7 @@ typedef struct  {
     int     ctr ;
 } state_t;
 uint8_t ar[LENGTH];
-																			/*0*//*1*//*2*//*3*//*4*//*5*//*6*//*7*//*8*//*9*/
+																		   /*0*//*1*//*2*//*3*//*4*//*5*//*6*//*7*//*8*//*9*/
 uint8_t full_digits[] = { 223, 134, 189, 183, 230, 119, 127, 199, 255, 247, 219, 130, 185, 179, 226, 115, 123, 131, 251, 243 };
 
 char *state[] = { "LOW", "RISING", "FALLING", "HIGH", "BLANK" };
@@ -45,10 +45,10 @@ int main(){
 	bcm2835_gpio_fsel(CLK, BCM2835_GPIO_FSEL_INPT); 
     bcm2835_gpio_fsel(DIO, BCM2835_GPIO_FSEL_INPT); 
 	
+	ec:
 	event_count();
 	
 	int proc_ar = 0;
-	printf("  1   2   3   4   5   6   7   8\n\n");
 	
 	for (int i = 0; i < car; i++){
 		printf("%3d ", ar[i]);
@@ -61,7 +61,11 @@ int main(){
 			printf("\n");
 		}
 	}
-	if (proc_ar < 3) printf("not found");
+	if (proc_ar < 3) {
+		//sleep(0.1);
+		car = 0;
+		goto ec;
+	}
 	printf("\n");
 	return 0;
 }
@@ -79,7 +83,7 @@ void event_count(){
 			dio_dat = bcm2835_gpio_lev( DIO );
 			if (ctr_dio > 7){
 				ar[car++] = value;
-				if (car > 200) break;
+				if (car > 150) break;
 				ctr_dio = 0; value = 0; 
 			}
 			value = value | (dio_dat << ctr_dio++);
@@ -143,18 +147,59 @@ void event_count(){
  0   0   0   0   0   0   0   0   0 
  0   0   0   0   0   0   0   0   0 
 
- 
-1. selang-seling 0 dan angka yang ada di full digit
-* a. saklar
-* b. counter
-* c. rekursif
-2. kalo nggak ada 2 kali di deretan angka, asumsikan abnormal
-* a. 
-* b. 
-3. Cek header. Kalo salah abaikan semua
+  1   1   0   0   0   0   0   0   3 
+  0   0   0   0   0   0   1   0  64 
+  0   0   0   0   0   0   1   1 192 
+  0   0   0   0   0   0   0   0   0 
+  0   0   0   0   0   1   0   1 160 
+  1   1   1   0   1   0   0   0  23 
+  0   0   0   0   0   1   1   0  96 
+  1   1   0   1   1   0   0   0  27 
+  0   0   0   0   0   1   1   0  96 
+  0   1   1   1   1   0   0   0  30 
+  0   0   0   0   0   1   1   0  96 
+  1   1   0   1   0   0   0   0  11 
+  0   1   0   0   0   0   0   0   2 
+  0   0   0   0   0   0   0   0   0 
+  0   0   0   0   0   0   0   0   0 
+  0   0   0   0   0   0   0   0   0 
+  0   1   0   1   0   0   0   1 138 
+  1   1   0   0   0   0   0   0   3 
+  0   0   0   0   0   0   1   0  64 
+  0   0   0   0   0   0   1   1 192 
+  0   0   0   0   0   0   0   0   0 
+  0   0   0   0   0   0   0   0   0 
+  1   0   1   1   1   1   0   1 189 2
+  0   1   1   0   1   1   0   0  54 
+  0   0   0   0   0   0   1   1 192 
+  0   0   1   1   1   1   0   0  60 
+  0   0   0   0   0   0   1   1 192 
+  0   1   1   0   1   1   0   0  54 
+  0   0   0   0   0   0   0   1 128 
+  0   0   0   0   0   0   0   0   0 
+  0   0   0   0   0   0   0   0   0 
+  0   0   0   0   0   0   0   0   0 
+  0   0   0   0   0   0   0   1 128 
+  0   1   0   0   0   1   1   1 226 4
+  1   1   0   0   0   0   0   0   3 
+  0   0   0   0   0   0   1   0  64 
+  0   0   0   0   0   0   1   1 192 
+  0   0   0   0   0   0   0   0   0 
+  0   0   0   0   0   0   0   0   0 
+  1   0   1   1   1   1   0   1 189 2
+  0   0   0   0   0   0   0   0   0 
+  1   1   0   1   1   0   1   1 219 0
+  0   0   0   0   0   0   0   0   0 
+  1   1   0   0   1   1   1   1 243 9
+  0   0   0   0   0   0   0   0   0 
+  1   1   0   1   1   0   1   1 219 0
+  0   0   0   0   0   0   0   0   0 
+  0   1   0   0   0   0   0   0   2 
+  0   0   0   0   0   0   0   0   0 
+  0   0   0   0   0   0   0   0   0 
+  0   0   0   0   0   0   0   0   0 
 
-27/05
-Bikin output dari megawin sebaris.  
-
+  Bisa jadi algoritmanya dah bener, buat mau maju ke step lain/lanjut. 8:30
+  * 
 */
 

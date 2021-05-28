@@ -7,7 +7,7 @@
 #define STB  17
 #define CLK  18 
 #define DIO  22 
-#define LENGTH 10000000
+#define LENGTH 5000000
 #define FALLING 2
 #define RISING  1
 
@@ -45,23 +45,31 @@ int main(){
 	bcm2835_gpio_fsel(CLK, BCM2835_GPIO_FSEL_INPT); 
     bcm2835_gpio_fsel(DIO, BCM2835_GPIO_FSEL_INPT); 
 	
+	for (int i = 0; i < LENGTH; i++){
+		ar[i] = 0;
+	}
+	
 	event_count();
 	
 	int proc_ar = 0;
-	printf("  1   2   3   4   5   6   7   8\n\n");
+	printf("  1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18\n\n");
 	
+	//LOG: print 3,64,192 sebagai awal dari baris secara konsisten berkali-kali
 	for (int i = 0; i < car; i++){
+		
+		if (ar[i] == 3 && ar[i+1] == 64 && ar[i+2] == 192) printf("\n"); 
+
+		//if (i%54 == 0 && i!=0) printf("\n");
 		printf("%3d ", ar[i]);
 		if ((i+1)%9 == 0 && i!=0){
 			for (int j = 0; j < 20; j++)
 				if (ar[i] == full_digits[j]) {
-					printf("%d", j%10 );
+					//printf("%d", j%10 );
 					proc_ar++;
 				}
-			printf("\n");
 		}
 	}
-	if (proc_ar < 3) printf("not found");
+	//if (proc_ar < 3) printf("not found");
 	printf("\n");
 	return 0;
 }
@@ -71,22 +79,35 @@ void event_count(){
 	int count_rising_stb = 0,shbf_done = 0;
 	for (int i = 0; i < LENGTH; i++){
 		stb_dat = bcm2835_gpio_lev( STB );
+		
 		clk_dat = bcm2835_gpio_lev( CLK );
 		stb_state = set_state(stb_dat, g_s_prev, &stb_pin, &g_s_prev, &stb_pin_prev);
+		
 		clk_state = set_state(clk_dat, g_c_prev, &clk_pin, &g_c_prev, &clk_pin_prev);
-		if (stb_pin_prev.ctr > 50000 && stb_pin.state == FALLING) shbf_done = 1;			
+		if (stb_pin_prev.ctr > 40000 && stb_pin.state == FALLING) shbf_done = 1;			
+		
+
+		
 		if (shbf_done == 1 && clk_pin.state == RISING){
+			
 			dio_dat = bcm2835_gpio_lev( DIO );
 			if (ctr_dio > 7){
 				ar[car++] = value;
-				if (car > 200) break;
+				//if (car > 200) break;
 				ctr_dio = 0; value = 0; 
 			}
 			value = value | (dio_dat << ctr_dio++);
-			ar[car++] = dio_dat;
+			//ar[car++] = dio_dat;
+    		if ( (car+1) % 54 == 0 && car != 0 ) { shbf_done = 0; ; };
+			
+		    
 		}
 	}
 }
+/* LOG
+ * print 3,64,192 sebagai awal dari baris secara konsisten berkali-kali
+ * 
+ **/
 
 /*
  1   1   0   0   0   0   0   0   3  
