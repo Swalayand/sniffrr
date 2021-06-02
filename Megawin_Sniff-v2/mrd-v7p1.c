@@ -62,7 +62,7 @@ void* printEvent(void *arg){
 		if (ar[17] != 138 || ar[5] < 115 ) continue;
 		for (int i = 0; i < 18; i++){	
 			for (int j = 0; j < 20; j++)
-				if (ar[i] == full_digits[j]) printf("%d ", j%10 );
+				if (ar[i] == full_digits[j] && ar[13] == 3) printf("%d ", j%10 ); 
 		}
 		printf("\r"); fflush( stdout );
 	}
