@@ -17,7 +17,7 @@ typedef struct  {
     int     ctr ;
 } state_t;
 uint8_t ar[LENGTH];
-																		   /*0*//*1*//*2*//*3*//*4*//*5*//*6*//*7*//*8*//*9*/
+																		   																		 /*0*//*1*//*2*//*3*//*4*//*5*//*6*//*7*//*8*//*9*/
 uint8_t full_digits[] = { 223, 134, 189, 183, 230, 119, 127, 199, 255, 247, 219, 130, 185, 179, 226, 115, 123, 131, 251, 243 };
 
 char *state[] = { "LOW", "RISING", "FALLING", "HIGH", "BLANK" };
@@ -43,9 +43,9 @@ int car = 0;
 
 int main(){
 	if (!bcm2835_init()) return 1;
-    bcm2835_gpio_fsel(STB, BCM2835_GPIO_FSEL_INPT); 
+  bcm2835_gpio_fsel(STB, BCM2835_GPIO_FSEL_INPT); 
 	bcm2835_gpio_fsel(CLK, BCM2835_GPIO_FSEL_INPT); 
-    bcm2835_gpio_fsel(DIO, BCM2835_GPIO_FSEL_INPT); 
+  bcm2835_gpio_fsel(DIO, BCM2835_GPIO_FSEL_INPT); 
 	pthread_t t;
 	pthread_create( &t, NULL, printEvent, NULL ); 
 	eventCount();
