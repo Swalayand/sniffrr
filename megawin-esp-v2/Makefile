@@ -3,6 +3,6 @@
 # project subdirectory.
 #
 
-PROJECT_NAME := wifi_softAP
+PROJECT_NAME := megawin-esp-v2
 
 include $(IDF_PATH)/make/project.mk

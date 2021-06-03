@@ -57,21 +57,22 @@ uint8_t setState(uint8_t current_p, uint8_t prev_p, state_t *pin, uint8_t *gp, s
 int car = 0;
 
 int shbf_done = 0;
+char res[54];
 
 void printEvent(void *arg){	
-
-		for (int i = 0; i < 54; i++){	
-			//if (ar[17] != 138 || ar[5] < 115 ) return;
-			for (int j = 0; j < 20; j++){
-				if ((ar[i] == full_digits[j] && ar[13] == 2) || (ar[i] == full_digits[j] && ar[13] == 3)) {
-            printf("%2d ", j%10 ); 
+    int c = 0;
+	for (int i = 0; i < 54; i++){	
+		//if (ar[17] != 138 || ar[5] < 115 ) return;
+		for (int j = 0; j < 20; j++){
+			if ((ar[i] == full_digits[j] && ar[13] == 2) || (ar[i] == full_digits[j] && ar[13] == 3)) {
+                //res += j%10;
+                sprintf(res+(c++), "%d", j%10);
+            }
         }
-      }
-			if (i % 18 == 0) printf("\t");
-		}
-		car = 0;
-		if (ar[17] == 138 || ar[5] >= 115 ) {printf("\n"); fflush( stdout );}
-
+		//if (i % 18 == 0) printf("\t");
+	}
+	car = 0;
+	//if (ar[17] == 138 || ar[5] >= 115 ) {printf("\n"); fflush( stdout );}
 }
 
 static void eventCount(void *param){
@@ -93,15 +94,15 @@ static void eventCount(void *param){
 			if ( (car+1) % 54 == 0 && car != 0 ) {
           printEvent(NULL);
           shbf_done = 0;
-      }
+        }
 			
 		}
 	}
 }
 
 static void configure(){
-		gpio_config_t io_conf;
-		io_conf.intr_type = GPIO_INTR_DISABLE;
+	gpio_config_t io_conf;
+	io_conf.intr_type = GPIO_INTR_DISABLE;
     io_conf.pin_bit_mask = GPIO_INPUT_PIN_SEL;
     io_conf.mode = GPIO_MODE_INPUT;
     io_conf.pull_up_en = 1;
@@ -141,9 +142,13 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
 static void do_retransmit(const int sock)
 {
     int len;
-    char rx_buffer[128];
-    char tx_buffer[128] = "concatenated with server";
-
+    char rx_buffer[1024];
+    char tx_buffer[128] = "HTTP 200 OK\r\n\r\n";
+    strcat(tx_buffer, res);
+    len = recv(sock, rx_buffer, sizeof(rx_buffer) - 1, 0);
+    printf("%s", rx_buffer);
+    send(sock, tx_buffer, strlen(tx_buffer), 0);
+    /*
     do {
         len = recv(sock, rx_buffer, sizeof(rx_buffer) - 1, 0);
         if (len < 0) {
@@ -159,7 +164,7 @@ static void do_retransmit(const int sock)
             int to_write = len;
             //while (to_write > 0) {
                 //int written = send(sock, rx_buffer + (len - to_write), to_write, 0);
-                int written = send(sock, tx_buffer, strlen(tx_buffer), 0);
+                int written = send(sock, res, strlen(res), 0);
                 if (written < 0) {
                     ESP_LOGE(TAG, "Error occurred during sending: errno %d", errno);
                 }
@@ -167,6 +172,7 @@ static void do_retransmit(const int sock)
             //}
         }
     } while (len > 0);
+    */
 }
 
 static void tcp_server_task(void *pvParameters)
@@ -299,7 +305,7 @@ void wifi_init_softap(void)
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_AP, &wifi_config));
     ESP_ERROR_CHECK(esp_wifi_start());
 
-    ESP_LOGI(TAG, "wifi_init_softap finished. SSID:%s password:%s channel:%d",
+    ESP_LOGI(TAG, "Wifi finished. SSID:%s password:%s channel:%d",
              EXAMPLE_ESP_WIFI_SSID, EXAMPLE_ESP_WIFI_PASS, EXAMPLE_ESP_WIFI_CHANNEL);
 }
 
@@ -320,7 +326,7 @@ void app_main(void)
     
 //#ifdef CONFIG_EXAMPLE_IPV4
     xTaskCreate(tcp_server_task, "tcp_server", 4096, (void*)AF_INET, 5, NULL);
-		xTaskCreate(eventCount, "megawin", 4096, NULL, 5, NULL);
+	xTaskCreate(eventCount, "megawin", 4096, NULL, 5, NULL);
     
 //#endif
 //#ifdef CONFIG_EXAMPLE_IPV6
