@@ -3,3 +3,6 @@ esp_spi_example/**/build
 Logic_analyzer-v1/**/build
 bit-bang/**/build
 Learn-C/*.out
+megawin-esp-beta/**/build
+megawin-esp-v1/**/build
+megawin-esp-v2/**/build
