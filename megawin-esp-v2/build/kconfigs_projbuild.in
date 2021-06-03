@@ -1,6 +1,0 @@
-source "/home/u/app/esp-idf/components/app_update/Kconfig.projbuild"
-source "/home/u/app/esp-idf/components/bootloader/Kconfig.projbuild"
-source "/home/u/app/esp-idf/components/esp_rom/Kconfig.projbuild"
-source "/home/u/app/esp-idf/components/esptool_py/Kconfig.projbuild"
-source "/home/u/dev/esp32-timbangan/megawin-esp-v2/main/Kconfig.projbuild"
-source "/home/u/app/esp-idf/components/partition_table/Kconfig.projbuild"
