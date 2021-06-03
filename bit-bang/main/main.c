@@ -72,10 +72,10 @@ static void IRAM_ATTR gpio_clk_handler(void* arg) {
 static void i2c_isr_gpio_task(void* arg) {
     uint32_t io_num;
     for(;;) {
-        if( xQueueReceive(gpio_evt_queue, &io_num, portMAX_DELAY)) {
-            //printf("GPIO[%d] intr, val: %d\n", io_num, gpio_get_level(io_num));  
-			ready = 1;     
-		}
+      if( xQueueReceive(gpio_evt_queue, &io_num, portMAX_DELAY)) {
+          //printf("GPIO[%d] intr, val: %d\n", io_num, gpio_get_level(io_num));  
+				ready = 1;     
+			}
     }
 }
 static void i2c_w_task(void* arg) {
