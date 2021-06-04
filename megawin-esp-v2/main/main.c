@@ -62,7 +62,7 @@ char res[54];
 void printEvent(void *arg){	
     int c = 0;
 	for (int i = 0; i < 54; i++){
-		//if (ar[17] != 138 || ar[5] < 115 ) return;
+		if (ar[0] != 3 && ar[17] != 138 && ar[18] != 3) break;
 		for (int j = 0; j < 20; j++){
 			if ((ar[i] == full_digits[j] && ar[13] == 2) || (ar[i] == full_digits[j] && ar[13] == 3)) {
                 //res += j%10;
@@ -83,7 +83,7 @@ static void eventCount(void *param){
 		stb_state = setState(stb_dat, g_s_prev, &stb_pin, &g_s_prev, &stb_pin_prev);
 		clk_state = setState(clk_dat, g_c_prev, &clk_pin, &g_c_prev, &clk_pin_prev);
 		
-		if (stb_pin_prev.ctr > 30000 && stb_pin.state == FALLING) shbf_done = 1;			
+		if (stb_pin_prev.ctr > 10000 && stb_pin.state == FALLING) shbf_done = 1;			
 		if (shbf_done == 1 && clk_pin.state == RISING){
 			dio_dat = (GPIO.in >> DIO_GPIO ) & 0x1;
 			if (ctr_dio > 7){
