@@ -61,7 +61,7 @@ char res[54];
 
 void printEvent(void *arg){	
     int c = 0;
-	for (int i = 0; i < 54; i++){	
+	for (int i = 0; i < 54; i++){
 		//if (ar[17] != 138 || ar[5] < 115 ) return;
 		for (int j = 0; j < 20; j++){
 			if ((ar[i] == full_digits[j] && ar[13] == 2) || (ar[i] == full_digits[j] && ar[13] == 3)) {
@@ -92,9 +92,9 @@ static void eventCount(void *param){
 			}
 			value = value | (dio_dat << ctr_dio++);
 			if ( (car+1) % 54 == 0 && car != 0 ) {
-          printEvent(NULL);
-          shbf_done = 0;
-        }
+                printEvent(NULL);
+                shbf_done = 0;
+            }
 			
 		}
 	}

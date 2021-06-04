@@ -30,7 +30,7 @@ typedef struct  {
     int     ctr ;
 } state_t;
 uint8_t ar[LENGTH];
-																		   /*0*//*1*//*2*//*3*//*4*//*5*//*6*//*7*//*8*//*9*/
+																		                                       /*0*//*1*//*2*//*3*//*4*//*5*//*6*//*7*//*8*//*9*/
 uint8_t full_digits[] = { 223, 134, 189, 183, 230, 119, 127, 199, 255, 247, 219, 130, 185, 179, 226, 115, 123, 131, 251, 243 };
 
 char *state[] = { "LOW", "RISING", "FALLING", "HIGH", "BLANK" };
@@ -57,10 +57,12 @@ int shbf_done = 0;
 void printEvent(void *arg){	
 
 		for (int i = 0; i < 54; i++){	
-			//if (ar[17] != 138 || ar[5] < 115 ) return;
+			if (ar[0] != 3 && ar[17] != 138 && ar[18] != 3) break;
+			//ESP_LOGI(TAG, "%d ", ar[i]);
+			//printf("%d ", ar[i]);
 			for (int j = 0; j < 20; j++){
 				if ((ar[i] == full_digits[j] && ar[13] == 2) || (ar[i] == full_digits[j] && ar[13] == 3)) {
-            printf("%2d ", j%10 ); 
+          printf("[%2d]", j%10 ); 
         }
       }
 			if (i % 18 == 0) printf("\t");
@@ -78,7 +80,7 @@ static void eventCount(void *param){
 		stb_state = setState(stb_dat, g_s_prev, &stb_pin, &g_s_prev, &stb_pin_prev);
 		clk_state = setState(clk_dat, g_c_prev, &clk_pin, &g_c_prev, &clk_pin_prev);
 		
-		if (stb_pin_prev.ctr > 30000 && stb_pin.state == FALLING) shbf_done = 1;			
+		if (stb_pin_prev.ctr > 10000 && stb_pin.state == FALLING) shbf_done = 1;			
 		if (shbf_done == 1 && clk_pin.state == RISING){
 			dio_dat = (GPIO.in >> DIO_GPIO ) & 0x1;
 			if (ctr_dio > 7){
