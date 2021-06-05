@@ -21,7 +21,7 @@
 #define STB_GPIO 17
 #define CLK_GPIO 18 
 #define DIO_GPIO 4 
-#define GPIO_INPUT_PIN_SEL  (1ULL<<STB_GPIO | 1ULL<<CLK_GPIO | 1ULL<<DIO_GPIO )
+#define GPIO_INPUT_PIN_SEL  ( 1ULL<<STB_GPIO | 1ULL<<CLK_GPIO | 1ULL<<DIO_GPIO )
 
 #define LENGTH 100
 #define FALLING 2
@@ -59,23 +59,25 @@ int car = 0;
 int shbf_done = 0;
 char res[54];
 
-void printEvent(void *arg){	
+
+void printEvent(void *arg){
     int c = 0;
-	for (int i = 0; i < 54; i++){
-		if (ar[0] != 3 && ar[17] != 138 && ar[18] != 3) break;
-		for (int j = 0; j < 20; j++){
-			if ((ar[i] == full_digits[j] && ar[13] == 2) || (ar[i] == full_digits[j] && ar[13] == 3)) {
-                //res += j%10;
-                sprintf(res+(c++), "%d", j%10);
-            }
-        }
-		//if (i % 18 == 0) printf("\t");
+	while(1){
+		sleep(0.2);
+		if (car < 54) continue;
+		car = 0;
+		if (ar[17] != 138 || ar[5] < 115 ) continue;
+
+		for (int i = 0; i < 54; i++){	
+			for (int j = 0; j < 20; j++)
+				if ((ar[i] == full_digits[j] && ar[13] == 2) || (ar[i] == full_digits[j] && ar[13] == 3)) sprintf(res+(c++), "%d", j%10);
+		}
+        c = 0;
 	}
-	car = 0;
-	//if (ar[17] == 138 || ar[5] >= 115 ) {printf("\n"); fflush( stdout );}
+
 }
 
-static void eventCount(void *param){
+void eventCount(void *param){
 	uint8_t stb_dat, stb_state, clk_dat, clk_state, dio_dat, ctr_dio = 0, value = 0;
 	while(1){
 		stb_dat = (GPIO.in >> STB_GPIO ) & 0x1;
@@ -91,10 +93,7 @@ static void eventCount(void *param){
 				ctr_dio = 0; value = 0; 
 			}
 			value = value | (dio_dat << ctr_dio++);
-			if ( (car+1) % 54 == 0 && car != 0 ) {
-                printEvent(NULL);
-                shbf_done = 0;
-            }
+			if ( (car+1) % 54 == 0 && car != 0 ) shbf_done = 0;
 			
 		}
 	}
@@ -108,8 +107,6 @@ static void configure(){
     io_conf.pull_up_en = 1;
     gpio_config(&io_conf);
 }
-
-
 
 /* The examples use WiFi configuration that you can set via project configuration menu.
 
@@ -143,40 +140,18 @@ static void do_retransmit(const int sock)
 {
     int len;
     char rx_buffer[1024];
-    char tx_buffer[128] = "HTTP 200 OK\r\n\r\n";
+    char tx_buffer[1024] = "HTTP 200 OK\r\n\r\n";
     strcat(tx_buffer, res);
     len = recv(sock, rx_buffer, sizeof(rx_buffer) - 1, 0);
-    printf("%s", rx_buffer);
     send(sock, tx_buffer, strlen(tx_buffer), 0);
-    /*
-    do {
-        len = recv(sock, rx_buffer, sizeof(rx_buffer) - 1, 0);
-        if (len < 0) {
-            ESP_LOGE(TAG, "Error occurred during receiving: errno %d", errno);
-        } else if (len == 0) {
-            ESP_LOGW(TAG, "Connection closed");
-        } else {
-            rx_buffer[len] = 0; // Null-terminate whatever is received and treat it like a string
-            ESP_LOGI(TAG, "Received %d bytes: %s", len, rx_buffer);
 
-            // send() can return less bytes than supplied length.
-            // Walk-around for robust implementation.
-            int to_write = len;
-            //while (to_write > 0) {
-                //int written = send(sock, rx_buffer + (len - to_write), to_write, 0);
-                int written = send(sock, res, strlen(res), 0);
-                if (written < 0) {
-                    ESP_LOGE(TAG, "Error occurred during sending: errno %d", errno);
-                }
-              //  to_write -= written;
-            //}
-        }
-    } while (len > 0);
-    */
 }
 
 static void tcp_server_task(void *pvParameters)
 {
+    xTaskCreate(eventCount, "counting_event", 4096, NULL, 5, NULL);
+    xTaskCreate(printEvent, "preparing_for_send", 4096, NULL, 5, NULL);
+
     char addr_str[128];
     int addr_family = (int)pvParameters;
     int ip_protocol = 0;
@@ -326,25 +301,9 @@ void app_main(void)
     
 //#ifdef CONFIG_EXAMPLE_IPV4
     xTaskCreate(tcp_server_task, "tcp_server", 4096, (void*)AF_INET, 5, NULL);
-	xTaskCreate(eventCount, "megawin", 4096, NULL, 5, NULL);
     
 //#endif
 //#ifdef CONFIG_EXAMPLE_IPV6
 //    xTaskCreate(tcp_server_task, "tcp_server", 4096, (void*)AF_INET6, 5, NULL);
 //#endif
-}
-
-void app_main_megawin(void)
-{
-    //Initialize NVS
-    esp_err_t ret = nvs_flash_init();
-    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-      ESP_ERROR_CHECK(nvs_flash_erase());
-      ret = nvs_flash_init();
-    }
-		
-    ESP_ERROR_CHECK(ret);
-    configure();
-    xTaskCreate(eventCount, "megawin", 4096, NULL, 5, NULL);
-
 }

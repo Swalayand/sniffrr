@@ -53,26 +53,46 @@ uint8_t setState(uint8_t current_p, uint8_t prev_p, state_t *pin, uint8_t *gp, s
 int car = 0;
 
 int shbf_done = 0;
+char res[54];
 
+/*
 void printEvent(void *arg){	
+  int c = 0;
+	for (int i = 0; i < 54; i++){
+		if (ar[17] != 138 && ar[18] != 3 && ar[35] != 138 && ar[36] != 3) break;
+		for (int j = 0; j < 20; j++){
+			if ((ar[i] == full_digits[j] && ar[13] == 2) || (ar[i] == full_digits[j] && ar[13] == 3)) {
+                //res += j%10;
+        sprintf(res+(c++), "%d", j%10);
+      }
+    }
+	}
+	if (c > 5) printf("%s \n", res);
+	//if (ar[17] == 138 || ar[5] >= 115 ) {printf("\n"); fflush( stdout );}
+}
+*/
+
+void printEvent(void *arg){
+	int c = 0;
+	while(1){
+		sleep(0.1);
+		if (car < 54) continue;
+		car = 0;
+		if (ar[17] != 138 || ar[5] < 115 ) continue;
 
 		for (int i = 0; i < 54; i++){	
-			if (ar[0] != 3 && ar[17] != 138 && ar[18] != 3) break;
-			//ESP_LOGI(TAG, "%d ", ar[i]);
-			//printf("%d ", ar[i]);
-			for (int j = 0; j < 20; j++){
-				if ((ar[i] == full_digits[j] && ar[13] == 2) || (ar[i] == full_digits[j] && ar[13] == 3)) {
-          printf("[%2d]", j%10 ); 
-        }
-      }
-			if (i % 18 == 0) printf("\t");
+			for (int j = 0; j < 20; j++)
+				if ((ar[i] == full_digits[j] && ar[13] == 2) || (ar[i] == full_digits[j] && ar[13] == 3)) sprintf(res+(c++), "%d", j%10);
+			//if (i % 18 == 0) printf("\t");
 		}
-		car = 0;
-		if (ar[17] == 138 || ar[5] >= 115 ) {printf("\n"); fflush( stdout );}
+		//printf("\n");
+		c = 0;
+		printf("%s\n", res);
+	}
 
 }
 
-static void eventCount(void *param){
+void eventCount(void *param){
 	uint8_t stb_dat, stb_state, clk_dat, clk_state, dio_dat, ctr_dio = 0, value = 0;
 	while(1){
 		stb_dat = (GPIO.in >> STB_GPIO ) & 0x1;
@@ -89,10 +109,8 @@ static void eventCount(void *param){
 			}
 			value = value | (dio_dat << ctr_dio++);
 			if ( (car+1) % 54 == 0 && car != 0 ) {
-          printEvent(NULL);
           shbf_done = 0;
       }
-			
 		}
 	}
 }
@@ -117,6 +135,6 @@ void app_main(void)
 		
     ESP_ERROR_CHECK(ret);
     configure();
-    xTaskCreate(eventCount, "megawin", 4096, NULL, 5, NULL);
-
+    xTaskCreate(eventCount, "eventCount", 4096, NULL, 5, NULL);
+		xTaskCreate(printEvent, "printEvent", 4096, NULL, 5, NULL);
 }
