@@ -27,7 +27,7 @@
 #define FALLING 2
 #define RISING  1
 
-static const char *TAG = "megawin";
+//static const char *TAG = "megawin";
 
 typedef struct  {
     uint8_t state;
@@ -72,6 +72,7 @@ void printEvent(void *arg){
 			for (int j = 0; j < 20; j++)
 				if ((ar[i] == full_digits[j] && ar[13] == 2) || (ar[i] == full_digits[j] && ar[13] == 3)) sprintf(res+(c++), "%d", j%10);
 		}
+        printf("%s\n", res);
         c = 0;
 	}
 
@@ -113,12 +114,12 @@ static void configure(){
    If you'd rather not, just change the below entries to strings with
    the config you want - ie #define EXAMPLE_WIFI_SSID "mywifissid"
 */
-#define EXAMPLE_ESP_WIFI_SSID      "esp32-timbangan"//CONFIG_ESP_WIFI_SSID
+#define EXAMPLE_ESP_WIFI_SSID      "CHART - Catat HARga Timbangan"//CONFIG_ESP_WIFI_SSID
 #define EXAMPLE_ESP_WIFI_PASS      CONFIG_ESP_WIFI_PASSWORD
 #define EXAMPLE_ESP_WIFI_CHANNEL   CONFIG_ESP_WIFI_CHANNEL
 #define EXAMPLE_MAX_STA_CONN       CONFIG_ESP_MAX_STA_CONN
 
-#define PORT                        3333//CONFIG_EXAMPLE_PORT
+#define PORT                        80 // 3333//CONFIG_EXAMPLE_PORT
 #define KEEPALIVE_IDLE              5//CONFIG_EXAMPLE_KEEPALIVE_IDLE
 #define KEEPALIVE_INTERVAL          5//CONFIG_EXAMPLE_KEEPALIVE_INTERVAL
 #define KEEPALIVE_COUNT             3//CONFIG_EXAMPLE_KEEPALIVE_COUNT
@@ -127,12 +128,10 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
 {
     if (event_id == WIFI_EVENT_AP_STACONNECTED) {
         wifi_event_ap_staconnected_t* event = (wifi_event_ap_staconnected_t*) event_data;
-        ESP_LOGI(TAG, "station "MACSTR" join, AID=%d",
-                 MAC2STR(event->mac), event->aid);
+        //ESP_LOGI(TAG, "station "MACSTR" join, AID=%d", MAC2STR(event->mac), event->aid);
     } else if (event_id == WIFI_EVENT_AP_STADISCONNECTED) {
         wifi_event_ap_stadisconnected_t* event = (wifi_event_ap_stadisconnected_t*) event_data;
-        ESP_LOGI(TAG, "station "MACSTR" leave, AID=%d",
-                 MAC2STR(event->mac), event->aid);
+        //ESP_LOGI(TAG, "station "MACSTR" leave, AID=%d", MAC2STR(event->mac), event->aid);
     }
 }
 
@@ -180,7 +179,7 @@ static void tcp_server_task(void *pvParameters)
 
     int listen_sock = socket(addr_family, SOCK_STREAM, ip_protocol);
     if (listen_sock < 0) {
-        ESP_LOGE(TAG, "Unable to create socket: errno %d", errno);
+        //ESP_LOGE(TAG, "Unable to create socket: errno %d", errno);
         vTaskDelete(NULL);
         return;
     }
@@ -192,31 +191,31 @@ static void tcp_server_task(void *pvParameters)
     setsockopt(listen_sock, IPPROTO_IPV6, IPV6_V6ONLY, &opt, sizeof(opt));
 #endif
 
-    ESP_LOGI(TAG, "Socket created");
+    //ESP_LOGI(TAG, "Socket created");
 
     int err = bind(listen_sock, (struct sockaddr *)&dest_addr, sizeof(dest_addr));
     if (err != 0) {
-        ESP_LOGE(TAG, "Socket unable to bind: errno %d", errno);
-        ESP_LOGE(TAG, "IPPROTO: %d", addr_family);
+        //ESP_LOGE(TAG, "Socket unable to bind: errno %d", errno);
+        //ESP_LOGE(TAG, "IPPROTO: %d", addr_family);
         goto CLEAN_UP;
     }
-    ESP_LOGI(TAG, "Socket bound, port %d", PORT);
+    //ESP_LOGI(TAG, "Socket bound, port %d", PORT);
 
     err = listen(listen_sock, 1);
     if (err != 0) {
-        ESP_LOGE(TAG, "Error occurred during listen: errno %d", errno);
+        //ESP_LOGE(TAG, "Error occurred during listen: errno %d", errno);
         goto CLEAN_UP;
     }
 
     while (1) {
 
-        ESP_LOGI(TAG, "Socket listening");
+        //ESP_LOGI(TAG, "Socket listening");
 
         struct sockaddr_storage source_addr; // Large enough for both IPv4 or IPv6
         socklen_t addr_len = sizeof(source_addr);
         int sock = accept(listen_sock, (struct sockaddr *)&source_addr, &addr_len);
         if (sock < 0) {
-            ESP_LOGE(TAG, "Unable to accept connection: errno %d", errno);
+            //ESP_LOGE(TAG, "Unable to accept connection: errno %d", errno);
             break;
         }
 
@@ -234,7 +233,7 @@ static void tcp_server_task(void *pvParameters)
             inet6_ntoa_r(((struct sockaddr_in6 *)&source_addr)->sin6_addr, addr_str, sizeof(addr_str) - 1);
         }
 #endif
-        ESP_LOGI(TAG, "Socket accepted ip address: %s", addr_str);
+        //ESP_LOGI(TAG, "Socket accepted ip address: %s", addr_str);
 
         do_retransmit(sock);
 
@@ -280,8 +279,7 @@ void wifi_init_softap(void)
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_AP, &wifi_config));
     ESP_ERROR_CHECK(esp_wifi_start());
 
-    ESP_LOGI(TAG, "Wifi finished. SSID:%s password:%s channel:%d",
-             EXAMPLE_ESP_WIFI_SSID, EXAMPLE_ESP_WIFI_PASS, EXAMPLE_ESP_WIFI_CHANNEL);
+    //ESP_LOGI(TAG, "Wifi finished. SSID:%s password:%s channel:%d", EXAMPLE_ESP_WIFI_SSID, EXAMPLE_ESP_WIFI_PASS, EXAMPLE_ESP_WIFI_CHANNEL);
 }
 
 void app_main(void)
@@ -295,7 +293,7 @@ void app_main(void)
     ESP_ERROR_CHECK(ret);
 		configure();
     
-		ESP_LOGI(TAG, "ESP_WIFI_MODE_AP");
+		//ESP_LOGI(TAG, "ESP_WIFI_MODE_AP");
     
     wifi_init_softap();
     
