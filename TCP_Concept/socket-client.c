@@ -1,6 +1,7 @@
 // Client side C/C++ program to demonstrate Socket programming
 #include <stdio.h>
 #include <sys/socket.h>
+#include <sys/types.h>
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <string.h>
@@ -12,6 +13,8 @@ int main(int argc, char const *argv[])
 	struct sockaddr_in serv_addr;
 	char *hello = "Hello from client";
 	char buffer[1024] = {0};
+
+
 	if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 	{
 		printf("\n Socket creation error \n");
@@ -33,9 +36,31 @@ int main(int argc, char const *argv[])
 		printf("\nConnection Failed \n");
 		return -1;
 	}
-	send(sock , hello , strlen(hello) , 0 );
-	printf("Hello message sent\n");
-	valread = read( sock , buffer, 1024);
-	printf("%s\n",buffer );
+
+	/*		
+	char c;
+	while(1){
+		c = getc(stdin);
+		printf("%c :%d\n", c, __LINE__);
+		send(sock , hello , strlen(hello) , 0 );
+		printf("Hello message sent from client line:%d\n", __LINE__);
+		c = getchar();
+		valread = read( sock , buffer, 1024);
+		printf("%s %d %c line:%d\n", buffer, valread, c, __LINE__);
+		//printf("%s line:%d\n", buffer, __LINE__);
+	}*/
+
+	ssize_t send_d;
+	char c;
+	while(1){
+		c = getc(stdin);
+		valread = read( sock , buffer, 1024);
+		printf("%s line:%d\n",buffer, __LINE__ );
+		send_d = send(sock , hello , strlen(hello) , 0 );
+		printf("%ld %d line:%d\n", send_d, valread, __LINE__);
+		printf("Hello from server\n");
+		//close(new_socket);
+  }
+
 	return 0;
 }
